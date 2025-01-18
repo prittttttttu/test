@@ -1,145 +1,53 @@
-<!doctype html>
-<html lang="ja">
-  <head>
-    <meta charset="utf-8">
-    <title>LIFF API Sandbox</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
-    <script src="https://d.line-scdn.net/liff/1.0/sdk.js"></script>
-    <script src="https://unpkg.com/vue@2.5.3/dist/vue.min.js"></script>
-    <style>
-    .container {
-    }
-    .wrap {
-      padding: 5px;
-      border-bottom: 1px solid #aaa;
-    }
-    .response {
-      word-wrap: break-word;
-    }
-    h1 {
-      font-size: 18px;
-    }
-    </style>
-  </head>
-  <body>
-    <div id="container">
-      <h1>LIFF API Sandbox</h1>
-      <div class="wrap wrap1">
-        <h1>liff.init()</h1>
-        <pre class="response"></pre>
-      </div>
-      <div class="wrap wrap2">
-        <h1>liff.getProfile()</h1>
-        <pre class="response"></pre>
-      </div>
-      <div class="wrap wrap3">
-        <h1>liff.getAccessToken()</h1>
-        <pre class="response"></pre>
-      </div>
-      <div class="wrap wrap4">
-        <h1>liff.initPlugins()/liff.getAvailability()</h1>
-        <pre class="response"></pre>
-      </div>
-      <div class="wrap wrap98">
-        <h1>liff.openWindow()</h1>
-        <button @click="openWindow">URLを開く</button>
-      </div>
-      <div class="wrap wrap99">
-        <h1>liff.sendMessages()</h1>
-        <button @click="sendMessage">メッセージを送信</button>
-      </div>
-      <div class="wrap wrap100">
-        <h1>liff.closeWindow()</h1>
-        <button @click="closeWindow">LIFFを閉じる</button>
-      </div>
-      <div class="wrap wrap101">
-        <h1>liff.sendMessages()</h1>
-        <button @click="sendEvilMessages">悪意のあるボタン(LINEのスクリーンネームが投稿されます)</button>
-      </div>
-    </div>
-    <script type="text/javascript">
-    new Vue({
-      el: `#container`,
-      data: {
-        userName: 'hoge'
-      },
-      mounted: function(){
-        const vm = this
-        liff.init(
-          data => {
-            document.querySelector('.wrap1 .response').innerHTML = JSON.stringify(data);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LIFF Send Message</title>
+  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+</head>
+<body>
+  <h1>LIFF メッセージ送信</h1>
+  <button id="sendMessageButton">メッセージを送信</button>
 
-            // getProfile
-            liff.getProfile()
-            .then(profile => {
-              const name = profile.displayName
-              vm.userName = profile.displayName
-              document.querySelector('.wrap2 .response').innerHTML = JSON.stringify(name);
-            })
-            .catch(err => {
-              document.querySelector('.wrap2 .response').innerHTML = JSON.stringify(err);
-            });
-
-            // getAccessToken
-            document.querySelector('.wrap3 .response').innerHTML = JSON.stringify(liff.getAccessToken());
-
-            // bluetooth init
-            liff.initPlugins(['bluetooth']).then(() => {
-              // availability
-              liff.bluetooth.getAvailability().then(available => {
-                document.querySelector('.wrap4 .response').innerHTML = JSON.stringify(available);
-              })
-            }).catch(err => {
-              document.querySelector('.wrap4 .response').innerHTML = JSON.stringify(err);
-            })
-          },
-          err => {
-            document.querySelector('.wrap1 .response').innerHTML = JSON.stringify(err);
-          }
-        );
-      },
-      methods: {
-        sendMessage: () => {
-          liff.sendMessages([
-            {
-              type:'text',
-              text:'Hello, World!'
-            }
-          ])
-          .then(() => {
-            console.log('message sent');
-          })
-          .catch((err) => {
-            console.log('error', err);
-          });
-        },
-        sendEvilMessages: function() {
-          const vm = this
-          liff.sendMessages([
-            {
-              type:'text',
-              text: `私の名前は「${vm.userName}」です`
-            }
-          ])
-          .then(() => {
-            console.log('message sent');
-            liff.closeWindow()
-          })
-          .catch((err) => {
-            console.log('error', err);
-          });
-        },
-        openWindow: () => {
-          liff.openWindow({
-            url: 'https://example.com/',
-            external: true
-          })
-        },
-        closeWindow: () => {
-          liff.closeWindow()
-        }
-      }
+  <script>
+    // LIFF 初期化
+document.addEventListener('DOMContentLoaded', function () {
+  liff.init({ liffId: "2006793281-ByopxRG5" }) // あなたの LIFF ID に置き換え
+    .then(() => {
+      console.log('LIFF initialized');
+      setupButton();
     })
-    </script>
-  </body>
+    .catch(err => {
+      console.error('LIFF initialization failed', err);
+    });
+});
+
+function setupButton() {
+  const sendMessageButton = document.getElementById('sendMessageButton');
+  sendMessageButton.addEventListener('click', () => {
+    if (liff.isLoggedIn()) {
+      sendMessage();
+    } else {
+      liff.login();
+    }
+  });
+}
+
+function sendMessage() {
+  liff.sendMessages([{
+    type: 'text',
+    text: 'こんにちは！LIFFを使ってメッセージを送信しています。'
+  }])
+    .then(() => {
+      alert('メッセージが送信されました！');
+      liff.closeWindow();
+    })
+    .catch(err => {
+      console.error('メッセージ送信失敗:', err);
+    });
+}
+
+  </script>
+</body>
 </html>
